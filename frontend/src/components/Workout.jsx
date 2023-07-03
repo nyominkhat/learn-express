@@ -25,7 +25,7 @@ const Workout = ({ workout }) => {
         <strong>Load (Kg) :</strong> {workout.load}
       </p>
       <p>
-        <strong>Reps:</strong> {workout.reqs}
+        <strong>Reps:</strong> {workout.reps}
       </p>
       <p>
         {formatDistanceToNow(new Date(workout.createdAt), { addSuffix: true })}
