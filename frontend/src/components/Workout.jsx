@@ -3,13 +3,22 @@ import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import { Link } from "react-router-dom";
 
 import { useWorkoutsContext } from "../hooks/useWorkoutsContext";
+import { useAuthContext } from "../hooks/useAuthContext";
 
 const Workout = ({ workout }) => {
   const { dispatch } = useWorkoutsContext();
+  const { user } = useAuthContext();
 
   const handleDelete = async () => {
+    if (!user) {
+      return;
+    }
+
     const response = await fetch("/api/workouts/" + workout._id, {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
     });
     const json = await response.json();
 

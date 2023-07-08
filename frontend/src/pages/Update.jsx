@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import { useWorkoutsContext } from "../hooks/useWorkoutsContext";
+import { useAuthContext } from "../hooks/useAuthContext";
 
 const Update = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { dispatch, workouts } = useWorkoutsContext();
+  const { dispatch } = useWorkoutsContext();
+  const { user } = useAuthContext();
   const [workout, setWorkout] = useState(null);
   const [title, setTitle] = useState("");
   const [load, setLoad] = useState("");
@@ -15,7 +17,11 @@ const Update = () => {
 
   useEffect(() => {
     const fetchWorkout = async () => {
-      const response = await fetch("/api/workouts/" + id);
+      const response = await fetch("/api/workouts/" + id, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
       const json = await response.json();
 
       if (response.ok) {
@@ -26,8 +32,10 @@ const Update = () => {
       }
     };
 
-    fetchWorkout();
-  }, [id]);
+    if (user) {
+      fetchWorkout();
+    }
+  }, [id, user]);
 
   if (!workout) {
     return <p>Loading ...</p>;
@@ -36,12 +44,18 @@ const Update = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
 
+    if (!user) {
+      setError("You must be logged in!");
+      return;
+    }
+
     const updatedWorkout = { title, load, reps };
 
     const response = await fetch("/api/workouts/" + id, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${user.token}`,
       },
       body: JSON.stringify(updatedWorkout),
     });
@@ -97,7 +111,7 @@ const Update = () => {
         value={reps}
       />
 
-      <button>Add workout</button>
+      <button>Update workout</button>
       {error && <div className="error">{error}</div>}
     </form>
   );
